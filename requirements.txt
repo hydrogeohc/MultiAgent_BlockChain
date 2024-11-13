@@ -1,0 +1,11 @@
+crewai==0.1.14
+crewai 
+crewai-tools
+langchain==0.0.351
+anthropic
+python-dotenv
+#openrouter
+llama-index-llms-openrouter
+
+
+
