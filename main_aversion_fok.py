@@ -2,6 +2,7 @@ import sys
 import os
 import pandas as pd
 from crewai import Agent, Task, Crew, Process
+from crewai import LLM
 #from langchain_anthropic import ChatAnthropic
 from pydantic import BaseModel, Field
 from typing import Any
@@ -19,13 +20,16 @@ load_dotenv()
 # Load and preprocess the data
 data = pd.read_csv('./address_data_features_combined.csv')
 
+os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
+llm = LLM(model="anthropic/claude-3-opus-20240229")
+
 # Initialize ChatAnthropic with API configuration for Claude
-claude_model = ChatAnthropic(
+""" claude_model = ChatAnthropic(
     model="claude-3",  # Replace with the specific Claude version you're using
     anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
     temperature=0.1
 )
-
+ """
 # The rest of your code (defining agents, tasks, crew, etc.) remains the same.
 # Define tool classes
 class ContractMinerTool(BaseTool):
@@ -79,7 +83,7 @@ contract_miner = Agent(
     goal="Mine fraud and normal contracts from blockchain explorers and create balanced datasets",
     backstory="An expert in blockchain data extraction and dataset creation",
     tools=[ContractMinerTool(data)],
-    llm=claude_model,
+    llm=llm,
     verbose=True
 )
 
@@ -89,7 +93,7 @@ investigative_agent1 = Agent(
     goal="Detect fraud contracts accurately using Algorithm A",
     backstory="A fraud detection specialist using advanced machine learning techniques",
     tools=[FraudDetectionTool(algorithm="A", data=data)],
-    llm=claude_model,
+    llm=llm,
     verbose=True
 )
 
@@ -99,7 +103,7 @@ investigative_agent2 = Agent(
     goal="Detect fraud contracts accurately using Algorithm B",
     backstory="A fraud detection specialist using statistical analysis",
     tools=[FraudDetectionTool(algorithm="B", data=data)],
-    llm=claude_model,
+    llm=llm,
     verbose=True
 )
 
@@ -109,7 +113,7 @@ ethics_agent = Agent(
     goal="Ensure fair and unbiased fraud detection",
     backstory="An AI ethics expert overseeing the fraud detection process",
     tools=[EthicsCheckerTool(data)],
-    llm=claude_model,
+    llm=llm,
     verbose=True
 )
 
@@ -119,7 +123,7 @@ performance_monitor = Agent(
     goal="Monitor and improve the performance of Investigative Agents",
     backstory="A data analyst specializing in performance optimization",
     tools=[PerformanceMonitorTool()],
-    llm=claude_model,
+    llm=llm,
     verbose=True
 )
 
