@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # Load the dataset
-file_path = 'address_data_features_combined.csv'
+file_path = './address_data_features_combined.csv'
 data = pd.read_csv(file_path)
 
 # Preprocessing data
@@ -12,7 +12,7 @@ X = data.drop(columns=['Address', 'FLAG'])  # Features
 y = data['FLAG']  # Target label
 
 # Splitting the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Initialize Random Forest Classifier
 rf_classifier = RandomForestClassifier(random_state=42)

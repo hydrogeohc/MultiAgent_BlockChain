@@ -6,6 +6,7 @@ anthropic
 python-dotenv
 #openrouter
 llama-index-llms-openrouter
+tavily-python
 
 
 
