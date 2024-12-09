@@ -1,0 +1,13 @@
+LICENSE
+README.md
+setup.py
+crewai_ok/ContractMinerTool.py
+crewai_ok/EthicsCheckerTool.py
+crewai_ok/FraudDetectionTool.py
+crewai_ok/PerformanceMonitorTool.py
+crewai_ok/SampleTool.py
+crewai_ok/__init__.py
+crewai_ok.egg-info/PKG-INFO
+crewai_ok.egg-info/SOURCES.txt
+crewai_ok.egg-info/dependency_links.txt
+crewai_ok.egg-info/top_level.txt
