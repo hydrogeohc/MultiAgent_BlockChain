@@ -68,7 +68,7 @@ class PerformanceMonitorTool(BaseTool):
 
     def _run(self, agent_results: str) -> str:
         return f"Monitored performance of agents based on results: {agent_results}"
-    
+
 # Define agents
 contract_miner = Agent(
     name="ContractMiner",
@@ -110,12 +110,13 @@ investigative_agent3 = Agent(
     verbose=True
 )
 
+cleaned_data = data.copy()
 ethics_agent = Agent(
     name="EthicsAgent",
     role="AI Ethics Expert",
     goal="Ensure fair and unbiased fraud detection",
     backstory="An AI ethics expert overseeing the fraud detection process",
-    tools=[EthicsCheckerTool(data=data)],
+    tools=[EthicsCheckerTool(data=cleaned_data)],
     llm=chat_model,
     verbose=True
 )
@@ -155,34 +156,70 @@ task4 = Task(
     expected_output="A list of detected fraud contracts using Algorithm C"
 )
 
-""" ## Create a dictionary with the fraud detection results
-fraud_detection_results = {
-    "predictions": [1, 0, 1, 0, 1],
-    "feature_importances": [0.2, 0.3, 0.1, 0.4]
+# Prepare input for EthicsCheckerTool
+results_data = {
+    "predictions": [1, 0, 1, 1, 0],  # Example predictions
+    "feature_importances": [0.2, 0.3, 0.5, 0.1, 0.4]  # Example feature importances
 }
 
-# Convert the dictionary to a JSON string
-results_json = json.dumps(fraud_detection_results)
- """
+# Convert results_data to JSON string
+results_json = json.dumps(results_data)
+
+# Define task5
 task5 = Task(
     description="Evaluate the fairness and bias of the fraud detection results",
     agent=ethics_agent,
     expected_output="An evaluation report on the fairness and bias of the fraud detection results",
-    tool_input={"results": "Detected fraud contracts: Contract 3, Contract 7, Contract 10"}
+    context=[
+        {
+            "description": "Provide predictions and feature importances for fairness evaluation",
+            "expected_output": "Fairness evaluation results based on the input predictions",
+            "results": results_json  # Pass the JSON string here
+        }
+    ]
 )
 
+# Define task6
 task6 = Task(
     description="Monitor the performance of Investigative Agents and provide feedback",
     agent=performance_monitor,
     expected_output="A performance report and feedback on the Investigative Agents",
-    tool_input={"agent_results": "Investigative agents' performance data showing contract 2 and contract 5 as identified frauds."}
+    context=[
+        {
+            "description": "Performance data on agents' contract processing",
+            "expected_output": "Performance analysis results and actionable feedback",
+            "data": {
+                "agent_results": [
+                    {"agent": "InvestigativeAgent1", "identified_contracts": [2, 5]},
+                    {"agent": "InvestigativeAgent2", "identified_contracts": [3, 7]},
+                    {"agent": "InvestigativeAgent3", "identified_contracts": [10]}
+                ]
+            }
+        }
+    ]
+)
+
+# Define a manager agent without tools
+manager_agent = Agent(
+    name="ManagerAgent",
+    role="Manager",
+    goal="Oversee and manage the hierarchical process",
+    backstory="An AI agent solely responsible for managing the workflow",
+    tools=[],  # No tools for the manager agent
+    llm=chat_model,
+    verbose=True
 )
 
 # Create the crew
 crew = Crew(
-    agents=[contract_miner, investigative_agent1, investigative_agent2, investigative_agent3, ethics_agent, performance_monitor],
-    tasks=[task1, task2, task3, task4, task5,task6],
-    process=Process.sequential
+    agents=[contract_miner, investigative_agent1, investigative_agent2, investigative_agent3, performance_monitor],
+    tasks=[task1, task2, task3, task4, task5, task6],
+    process=Process.hierarchical,
+    manager_llm=chat_model,
+    respect_context_window=True,
+    memory=True,
+    manager_agent=manager_agent,
+    planning=True
 )
 
 # Start the crew's work

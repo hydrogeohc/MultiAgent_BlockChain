@@ -27,6 +27,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="crewai_ok",
-    version="0.1",
+    version="0.7",
     packages=find_packages(),
 )

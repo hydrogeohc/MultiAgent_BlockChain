@@ -19,7 +19,7 @@ data = pd.read_csv('./address_data_features_combined.csv')
 
 # Initialize ChatOpenAI with standard OpenAI configuration
 chat_model = ChatOpenAI(
-    model_name="gpt-3.5-turbo",
+    model_name="gpt-4o-2024-08-06",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     temperature=0.1
 )
@@ -68,8 +68,19 @@ class PerformanceMonitorTool(BaseTool):
 
     def _run(self, agent_results: str) -> str:
         return f"Monitored performance of agents based on results: {agent_results}"
-    
+
 # Define agents
+
+manager_agent = Agent(
+    name="ManagerAgent",
+    role="Manager",
+    goal="Oversee and manage the hierarchical process",
+    backstory="An AI agent solely responsible for managing the workflow",
+    tools=[],  # No tools for the manager agent
+    llm=chat_model,
+    verbose=True
+)
+
 contract_miner = Agent(
     name="ContractMiner",
     role="Contract Mining Specialist",
@@ -110,12 +121,13 @@ investigative_agent3 = Agent(
     verbose=True
 )
 
+cleaned_data = data.copy()
 ethics_agent = Agent(
     name="EthicsAgent",
     role="AI Ethics Expert",
     goal="Ensure fair and unbiased fraud detection",
     backstory="An AI ethics expert overseeing the fraud detection process",
-    tools=[EthicsCheckerTool(data=data)],
+    tools=[EthicsCheckerTool(data=cleaned_data)],
     llm=chat_model,
     verbose=True
 )
@@ -155,35 +167,45 @@ task4 = Task(
     expected_output="A list of detected fraud contracts using Algorithm C"
 )
 
-""" ## Create a dictionary with the fraud detection results
-fraud_detection_results = {
-    "predictions": [1, 0, 1, 0, 1],
-    "feature_importances": [0.2, 0.3, 0.1, 0.4]
-}
-
-# Convert the dictionary to a JSON string
-results_json = json.dumps(fraud_detection_results)
- """
 task5 = Task(
     description="Evaluate the fairness and bias of the fraud detection results",
     agent=ethics_agent,
     expected_output="An evaluation report on the fairness and bias of the fraud detection results",
-    tool_input={"results": "Detected fraud contracts: Contract 3, Contract 7, Contract 10"}
+    context=[
+        {
+            "description": "Detected fraud contracts in the dataset",
+            "expected_output": "List of detected fraud contracts",
+            "details": ["Contract 3", "Contract 7", "Contract 10"]  # Additional key for details
+        }
+    ]
 )
+
 
 task6 = Task(
     description="Monitor the performance of Investigative Agents and provide feedback",
     agent=performance_monitor,
     expected_output="A performance report and feedback on the Investigative Agents",
-    tool_input={"agent_results": "Investigative agents' performance data showing contract 2 and contract 5 as identified frauds."}
+    context=[
+        {
+            "description": "Performance data for investigative agents",
+            "expected_output": "Performance analysis report",
+            "details": "Investigative agents identified Contract 2 and Contract 5 as frauds"
+        }
+    ]
+)
+# Create the crew
+
+crew = Crew(
+    agents=[contract_miner, investigative_agent1, investigative_agent2, investigative_agent3, ethics_agent, performance_monitor],  # Exclude manager agent
+    tasks=[task1, task2, task3, task4, task5, task6],
+    process=Process.hierarchical,
+    manager_llm=chat_model,  # Optional: Specify the manager LLM
+    respect_context_window=True,
+    memory=True,
+    manager_agent=manager_agent,  # Use the new manager agent without tools
+    planning=True
 )
 
-# Create the crew
-crew = Crew(
-    agents=[contract_miner, investigative_agent1, investigative_agent2, investigative_agent3, ethics_agent, performance_monitor],
-    tasks=[task1, task2, task3, task4, task5,task6],
-    process=Process.sequential
-)
 
 # Start the crew's work
 result = crew.kickoff()

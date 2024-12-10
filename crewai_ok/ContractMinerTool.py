@@ -7,7 +7,7 @@ class ContractMinerTool:
     def __init__(self, data):
         self.data = data
 
-    def mine_contracts(self, fraud_percentage_range=(0, 1), step=0.1):
+    def mine_contracts(self, fraud_percentage_range=(0, 1), step=0.2):
         """
         Mine contracts from the dataset with a specified range of fraudulent contract percentages.
 

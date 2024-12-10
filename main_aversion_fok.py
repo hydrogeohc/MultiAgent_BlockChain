@@ -21,7 +21,7 @@ load_dotenv()
 data = pd.read_csv('./address_data_features_combined.csv')
 
 os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
-llm = LLM(model="anthropic/claude-3-opus-20240229")
+llm = LLM(model="anthropic/claude-3-5-sonnet-20240620")
 
 # Initialize ChatAnthropic with API configuration for Claude
 """ claude_model = ChatAnthropic(
@@ -107,6 +107,16 @@ investigative_agent2 = Agent(
     verbose=True
 )
 
+investigative_agent3 = Agent(
+    name="InvestigativeAgent3",
+    role="Fraud Detection Specialist C",
+    goal="Detect fraud contracts accurately using Algorithm C",
+    backstory="A fraud detection specialist using statistical analysis",
+    tools=[FraudDetectionTool(algorithm="C", data=data)],
+    llm=llm,
+    verbose=True
+)
+
 ethics_agent = Agent(
     name="EthicsAgent",
     role="AI Ethics Expert",
@@ -147,13 +157,20 @@ task3 = Task(
 )
 
 task4 = Task(
+    description="Detect fraud contracts in the dataset using Algorithm C",
+    agent=investigative_agent3,
+    expected_output="A list of detected fraud contracts using Algorithm C"
+)
+
+
+task5 = Task(
     description="Evaluate the fairness and bias of the fraud detection results",
     agent=ethics_agent,
     expected_output="An evaluation report on the fairness and bias of the fraud detection results",
     tool_input="Fraud detection results identified contract 2 and contract 5 as fraudulent."
 )
 
-task5 = Task(
+task6 = Task(
     description="Monitor the performance of Investigative Agents and provide feedback",
     agent=performance_monitor,
     expected_output="A performance report and feedback on the Investigative Agents",
@@ -162,8 +179,8 @@ task5 = Task(
 
 # Create the crew
 crew = Crew(
-    agents=[contract_miner, investigative_agent1, investigative_agent2, ethics_agent, performance_monitor],
-    tasks=[task1, task2, task3, task4, task5],
+    agents=[contract_miner, investigative_agent1, investigative_agent2,investigative_agent3, ethics_agent, performance_monitor],
+    tasks=[task1, task2, task3, task4, task5, task6],
     process=Process.sequential
 )
 
