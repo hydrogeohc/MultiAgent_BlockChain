@@ -1,12 +1,15 @@
 from sklearn.ensemble import RandomForestClassifier, IsolationForest
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import pandas as pd
 import numpy as np
 
 class FraudDetectionTool:
     name = "FraudDetectionTool"
 
     def __init__(self, algorithm, data):
+        if 'FLAG' not in data.columns:
+            raise ValueError("The 'FLAG' column is missing from the dataset.")
         self.algorithm = algorithm
         self.data = data
 
@@ -24,12 +27,11 @@ class FraudDetectionTool:
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
         elif self.algorithm == "C":
-            contamination = 0.1  # Adjust this value based on your dataset
+            contamination = 0.001  # Adjust this value based on your dataset
             model = IsolationForest(n_estimators=100, contamination=contamination, random_state=42)
             model.fit(X_train)
             y_pred = model.predict(X_test)
-            # Convert predictions to match the format of other algorithms
-            y_pred = np.where(y_pred == 1, 0, 1)
+            y_pred = np.where(y_pred == 1, 0, 1)  # Convert predictions to match other formats
 
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)

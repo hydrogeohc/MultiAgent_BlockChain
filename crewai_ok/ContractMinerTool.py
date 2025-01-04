@@ -5,9 +5,11 @@ class ContractMinerTool:
     name = "ContractMinerTool"
 
     def __init__(self, data):
+        if 'FLAG' not in data.columns:
+            raise ValueError("The 'FLAG' column is missing from the dataset.")
         self.data = data
 
-    def mine_contracts(self, fraud_percentage_range=(0, 1), step=0.2):
+    def mine_contracts(self, fraud_percentage_range=(0, 1), step=0.005):
         """
         Mine contracts from the dataset with a specified range of fraudulent contract percentages.
 

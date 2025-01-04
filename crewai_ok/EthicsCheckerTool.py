@@ -8,52 +8,20 @@ from pydantic import Field
 class EthicsCheckerTool:
     name: str = "EthicsCheckerTool"
     description: str = "Evaluate fairness, bias, and performance of fraud detection results. Input must be a JSON string."
-    data: Any = Field(default=None, exclude=True)
 
     def __init__(self, data):
-        super().__init__()
+        if 'FLAG' not in data.columns:
+            raise ValueError("The 'FLAG' column is missing from the dataset.")
         self.data = data
         self.le = LabelEncoder()
         self.data['FLAG'] = self.le.fit_transform(self.data['FLAG'])
         self.fraud_criteria = self.define_fraud_criteria()
-
-    class Config:
-        arbitrary_types_allowed = True
 
     def define_fraud_criteria(self):
         return {
             'high_value_received': self.data['max value received'].quantile(0.95),
             'high_transaction_count': self.data['total transactions (including tnx to create contract'].quantile(0.95),
             'suspicious_time_pattern': self.data['Time Diff between first and last (Mins)'].quantile(0.05)
-        }
-
-    def _run(self, results: str):
-        try:
-            # Parse the input JSON string
-            results_dict = json.loads(results)
-            predictions = np.array(results_dict.get('predictions', []))
-            feature_importances = results_dict.get('feature_importances', [])
-
-            # Perform evaluations
-            fairness_metrics = self.check_fairness(predictions)
-            bias_report = self.check_bias(feature_importances)
-            performance_metrics = self.check_performance(predictions)
-            transparency_report = self.generate_transparency_report()
-
-            # Format the output
-            return self.format_output(fairness_metrics, bias_report, performance_metrics, transparency_report)
-        except json.JSONDecodeError:
-            return "Error: Invalid input format. Please provide a valid JSON string."
-        except ValueError as e:
-            return f"Error: {str(e)}"
-
-    @property
-    def args_schema(self):
-        return {
-            "results": {
-                "description": "JSON string containing predictions and feature importances",
-                "type": "str"
-            }
         }
 
     def check_fairness(self, predictions):
@@ -140,3 +108,29 @@ class EthicsCheckerTool:
         for column, count in transparency_report['missing_values'].items():
             output += f"- {column}: {count}\n"
         return output
+
+    def evaluate(self, results):
+        """
+        Evaluate the dataset based on predictions and feature importances.
+
+        Args:
+            results (str): JSON string containing predictions and feature importances.
+
+        Returns:
+            str: A detailed report of fairness, bias, performance, and transparency.
+        """
+        try:
+            results_dict = json.loads(results)
+            predictions = np.array(results_dict.get('predictions', []))
+            feature_importances = results_dict.get('feature_importances', [])
+
+            fairness_metrics = self.check_fairness(predictions)
+            bias_report = self.check_bias(feature_importances)
+            performance_metrics = self.check_performance(predictions)
+            transparency_report = self.generate_transparency_report()
+
+            return self.format_output(fairness_metrics, bias_report, performance_metrics, transparency_report)
+        except json.JSONDecodeError:
+            return "Error: Invalid input format. Please provide a valid JSON string."
+        except ValueError as e:
+            return f"Error: {str(e)}"

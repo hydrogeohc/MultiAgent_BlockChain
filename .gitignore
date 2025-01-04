@@ -1,3 +1,4 @@
 *.env
 *.csv
 /crewai_env/
+/mulitiblock/
