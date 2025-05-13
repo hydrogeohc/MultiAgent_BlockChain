@@ -2,6 +2,12 @@
 
 This project implements a multi-agent system for detecting fraud in blockchain transactions using crewAI. The system utilizes various agents and custom tools to mine contract data, detect potential fraud, ensure ethical considerations, and monitor performance.
 
+The results is published as a journal paper. If you happened to use this case, please cite this paper:
+
+```
+Chen, Y. J., & Madisetti, V. K. (2024). Information Security, Ethics, and Integrity in LLM Agent Interaction. Journal of Information Security, 16(1), 184-196.
+```
+
 ## Overview
 The Blockchain Fraud Detection System consists of the following key components:
 
