@@ -7,7 +7,8 @@ The results is published as a journal paper. If you happened to use this case, p
 ```
 Chen, Y. J., & Madisetti, V. K. (2024). Information Security, 
 Ethics, and Integrity in LLM Agent Interaction. 
-Journal of Information Security, 16(1), 184-196.
+Journal of Information Security, 16(1), 184-196. 
+DOI: 10.4236/jis.2025.161010 
 ```
 
 ## Overview
