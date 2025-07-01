@@ -14,7 +14,6 @@ import logging
 #   ├── agents.py
 #   ├── tasks.py
 #   ├── crew_manager.py
-#   ├── .env
 #   └── temp_datasets/ # Created by ContractMinerTool
 #   └── ... (your actual tool logic files if separate)
 
@@ -28,12 +27,12 @@ if project_root not in sys.path:
 try:
     from config import APP_CONFIG, validate_config
     from logging_setup import setup_logging
-    from data_loader import load_dataset
-    from llm_setup import initialize_llm
-    from tools import ProductionContractMinerTool, ProductionFraudDetectionTool, ProductionEthicsCheckerTool, ProductionPerformanceMonitorTool # Import the tool classes
-    from agents import create_agents
-    from tasks import create_tasks
-    from manager import setup_crew
+    from MAS.data_loader import load_dataset
+    from MAS.llm_setup import initialize_llm
+    from MAS.tools import ProductionContractMinerTool, ProductionFraudDetectionTool, ProductionEthicsCheckerTool, ProductionPerformanceMonitorTool # Import the tool classes
+    from MAS.agents import create_agents
+    from MAS.tasks import create_tasks
+    from MAS.crew_manager import setup_crew
 except ImportError as e:
     print(f"Error importing necessary modules. Ensure all files are in the correct path and dependencies are installed. Details: {e}", file=sys.stderr)
     sys.exit("Module import failed.")
